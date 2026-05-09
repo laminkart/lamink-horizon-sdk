@@ -42,19 +42,19 @@ RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/r
 
 RUN apt update && apt install -y \
   ros-humble-ros-base \
-  python3-empy=3.3.4-2 \
+#   python3-empy=3.3.4-2 \
   python3-rosdep \
   python3-vcstool \
   && rm -rf /var/lib/apt/lists/
 
-RUN rosdep init 
+RUN rosdep init
 
 ### Install Gazebo
 RUN curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg && \
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
 
 RUN bash -c 'curl https://raw.githubusercontent.com/osrf/osrf-rosdep/master/gz/00-gazebo.list --output /etc/ros/rosdep/sources.list.d/00-gazebo.list'
-ENV GZ_VERSION=harmonic 
+ENV GZ_VERSION=harmonic
 
 RUN apt update && apt install -y \
     gz-harmonic \
@@ -72,12 +72,16 @@ WORKDIR $HOME
 # Install ArduSub
 RUN git clone https://github.com/ArduPilot/ardupilot.git
 WORKDIR $HOME/ardupilot
-RUN git checkout 2dd0bb7d4c85ac48437f139d66df648fc0e1d4ae
+# Sub-4.5.1
+RUN git checkout 30257f01185471ab4c1ac544e47d1b4437e44c98
 RUN git submodule update --init --recursive
-RUN rm $HOME/ardupilot/Tools/environment_install/install-prereqs-ubuntu.sh
-RUN wget -P $HOME/ardupilot/Tools/environment_install/ https://raw.githubusercontent.com/ArduPilot/ardupilot/c623ae8b82db4d7e195f4b757e2ae5d049f941e5/Tools/environment_install/install-prereqs-ubuntu.sh
-RUN chmod +x $HOME/ardupilot/Tools/environment_install/install-prereqs-ubuntu.sh
+
 RUN USER=kasm-user Tools/environment_install/install-prereqs-ubuntu.sh -y
+
+# RUN rm $HOME/ardupilot/Tools/environment_install/install-prereqs-ubuntu.sh
+# RUN wget -P $HOME/ardupilot/Tools/environment_install/ https://raw.githubusercontent.com/ArduPilot/ardupilot/c623ae8b82db4d7e195f4b757e2ae5d049f941e5/Tools/environment_install/install-prereqs-ubuntu.sh
+# RUN chmod +x $HOME/ardupilot/Tools/environment_install/install-prereqs-ubuntu.sh
+# RUN USER=kasm-user Tools/environment_install/install-prereqs-ubuntu.sh -y
 
 RUN sudo pip3 install -U mavproxy PyYAML
 
@@ -123,6 +127,7 @@ COPY --chown=kasm-user:kasm-user suave_metrics/ $HOME/suave_ws/src/suave/suave_m
 COPY --chown=kasm-user:kasm-user suave_missions/ $HOME/suave_ws/src/suave/suave_missions/
 COPY --chown=kasm-user:kasm-user suave_monitor/ $HOME/suave_ws/src/suave/suave_monitor/
 COPY --chown=kasm-user:kasm-user suave_msgs/ $HOME/suave_ws/src/suave/suave_msgs/
+COPY --chown=kasm-user:kasm-user suave_runner/ $HOME/suave_ws/src/suave/suave_runner/
 
 # Install suave deps
 WORKDIR $HOME/suave_ws
@@ -132,7 +137,8 @@ RUN ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash \
 
 RUN ["/bin/bash", "-c", "sudo ./src/mavros/mavros/scripts/install_geographiclib_datasets.sh"]
 
-RUN pip uninstall empy -y && pip install empy==3.3.4
+# RUN sudo pip uninstall empy -y && pip install empy==3.3.4
+RUN pip install "setuptools<80.0.0"
 
 # Build suave
 RUN ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash \
