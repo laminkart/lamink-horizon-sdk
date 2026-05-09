@@ -8,6 +8,25 @@ install_libjpeg_turbo() {
     rm "$libjpeg_deb"
 }
 
+patch_clipboard_permission_check() {
+    local browser_js="$KASM_VNC_PATH/www/core/util/browser.js"
+    local bundle_js="$KASM_VNC_PATH/www/dist/main.bundle.js"
+
+    # KasmVNC 0.9.3.2 treats navigator.clipboard.read as enough support for
+    # binary clipboard, then queries "clipboard-read" through the Permissions
+    # API. Firefox exposes enough Clipboard API surface to pass that check, but
+    # rejects "clipboard-read" as a PermissionName and aborts the web UI.
+    sed -i \
+        's/if (isSafari()) { return false; }/if (isSafari() || isFirefox()) { return false; }/' \
+        "$browser_js"
+    sed -i \
+        's/if (isSafari()) {/if (isSafari() || browser_isFirefox()) {/' \
+        "$bundle_js"
+
+    grep -q 'isSafari() || isFirefox()' "$browser_js"
+    grep -q 'isSafari() || browser_isFirefox()' "$bundle_js"
+}
+
 echo "Install KasmVNC server"
 cd /tmp
 BUILD_ARCH=$(uname -p)
@@ -39,6 +58,7 @@ apt-get install -y gettext ssl-cert libxfont2
 dpkg -i /tmp/kasmvncserver.deb
 apt-get -yf install
 rm -f /tmp/kasmvncserver.deb
+patch_clipboard_permission_check
 
 #mkdir $KASM_VNC_PATH/certs
 mkdir -p $KASM_VNC_PATH/www/Downloads
