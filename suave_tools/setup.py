@@ -17,7 +17,11 @@ setup(
     maintainer_email='g.rezendesilva@tudelft.nl',
     description='TODO: Package description',
     license='Apache-2.0',
-    tests_require=['pytest'],
+    extras_require={
+        'test': [
+            'pytest',
+        ],
+    },
     entry_points={
         'console_scripts': [
         ],

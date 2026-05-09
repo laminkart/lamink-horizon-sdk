@@ -23,7 +23,11 @@ setup(
     maintainer_email='e.g.alberts@',
     description='TODO: Package description',
     license='TODO: License declaration',
-    tests_require=['pytest'],
+    extras_require={
+        'test': [
+            'pytest',
+        ],
+    },
     entry_points={
         'console_scripts': [
             'const_dist_mission = ' +
