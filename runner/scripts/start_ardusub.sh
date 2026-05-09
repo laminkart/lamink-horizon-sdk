@@ -23,4 +23,4 @@ else
 fi
 
 cd /tmp
-sim_vehicle.py -L RATBeach -v ArduSub  --model=JSON $GUI
+sim_vehicle.py -L RATBeach -v ArduSub --model=JSON $GUI

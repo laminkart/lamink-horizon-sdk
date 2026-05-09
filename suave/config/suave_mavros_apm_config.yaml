@@ -1,0 +1,41 @@
+# Minimal MAVROS ArduPilot configuration for the SUAVE simulation.
+
+/**:
+  ros__parameters:
+    startup_px4_usb_quirk: false
+
+/**/sys:
+  ros__parameters:
+    min_voltage: [10.0]
+    disable_diag: false
+    heartbeat_rate: 1.0
+    heartbeat_mav_type: "ONBOARD_CONTROLLER"
+    conn_timeout: 10.0
+
+/**/time:
+  ros__parameters:
+    time_ref_source: "fcu"
+    timesync_mode: MAVLINK
+    timesync_avg_alpha: 0.6
+    timesync_rate: 1.0
+    system_time_rate: 0.0
+
+/**/cmd:
+  ros__parameters:
+    use_comp_id_system_control: false
+
+/**/local_position:
+  ros__parameters:
+    frame_id: "map"
+    tf.send: false
+    tf.frame_id: "map"
+    tf.child_frame_id: "base_link"
+    tf.send_fcu: false
+
+/**/setpoint_position:
+  ros__parameters:
+    tf.listen: false
+    tf.frame_id: "map"
+    tf.child_frame_id: "target_position"
+    tf.rate_limit: 50.0
+    mav_frame: LOCAL_NED

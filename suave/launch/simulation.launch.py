@@ -19,7 +19,7 @@ def generate_launch_description():
             import logging
             logging.getLogger().setLevel(logging.ERROR)
         return []
-    
+
     silent_arg = DeclareLaunchArgument(
         'silent',
         default_value='false',
@@ -55,17 +55,59 @@ def generate_launch_description():
 
     mavros_path = get_package_share_directory('mavros')
     mavros_launch_path = os.path.join(
-        mavros_path, 'launch', 'apm.launch')
+        mavros_path, 'launch', 'node.launch')
+
+    suave_path = get_package_share_directory('suave')
+    mavros_config_default = os.path.join(
+        suave_path,
+        'config',
+        'suave_mavros_apm_config.yaml')
+    mavros_pluginlists_default = os.path.join(
+        suave_path,
+        'config',
+        'suave_mavros_apm_pluginlists.yaml')
+
+    fcu_url = LaunchConfiguration('fcu_url')
+    fcu_url_arg = DeclareLaunchArgument(
+        'fcu_url',
+        default_value='udp://0.0.0.0:14550@14555',
+        description='MAVROS FCU connection URL'
+    )
+
+    gcs_url = LaunchConfiguration('gcs_url')
+    gcs_url_arg = DeclareLaunchArgument(
+        'gcs_url',
+        default_value='',
+        description='Optional MAVROS GCS forwarding URL'
+    )
+
+    mavros_config_yaml = LaunchConfiguration('mavros_config_yaml')
+    mavros_config_yaml_arg = DeclareLaunchArgument(
+        'mavros_config_yaml',
+        default_value=mavros_config_default,
+        description='MAVROS parameter configuration YAML'
+    )
+
+    mavros_pluginlists_yaml = LaunchConfiguration('mavros_pluginlists_yaml')
+    mavros_pluginlists_yaml_arg = DeclareLaunchArgument(
+        'mavros_pluginlists_yaml',
+        default_value=mavros_pluginlists_default,
+        description='MAVROS plugin allowlist/denylist YAML'
+    )
+
     mavros_node = IncludeLaunchDescription(
         AnyLaunchDescriptionSource(mavros_launch_path),
         launch_arguments={
-            'fcu_url': 'udp://0.0.0.0:14551@14555',
-            'gcs_url': 'udp://@localhost:14550',
-            'system_id': '255',
-            'component_id': '240',
-            'target_system_id': '1',
-            'target_component_id': '1',
-            'log_out': print_output,
+            'fcu_url': fcu_url,
+            'gcs_url': gcs_url,
+            'tgt_system': '1',
+            'tgt_component': '1',
+            'config_yaml': mavros_config_yaml,
+            'pluginlists_yaml': mavros_pluginlists_yaml,
+            'log_output': print_output,
+            'fcu_protocol': 'v2.0',
+            'respawn_mavros': 'false',
+            'namespace': 'mavros',
             }.items()
         )
 
@@ -132,6 +174,10 @@ def generate_launch_description():
         x_arg,
         y_arg,
         z_arg,
+        fcu_url_arg,
+        gcs_url_arg,
+        mavros_config_yaml_arg,
+        mavros_pluginlists_yaml_arg,
         print_output_arg,
         silent_arg,
         OpaqueFunction(function=configure_logging),

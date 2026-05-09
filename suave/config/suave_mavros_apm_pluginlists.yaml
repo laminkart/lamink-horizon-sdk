@@ -1,0 +1,11 @@
+# Load only the MAVROS plugins used by SUAVE.
+
+/**:
+  ros__parameters:
+    plugin_allowlist:
+      - command
+      - local_position
+      - param
+      - setpoint_position
+      - sys_status
+      - sys_time
