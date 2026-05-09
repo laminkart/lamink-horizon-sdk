@@ -10,6 +10,18 @@ For more information about building custom images please review the  [**How To G
 The Kasm team publishes applications and desktop images for use inside the platform. More information, including source can be found in the [**Default Images List**](https://kasmweb.com/docs/latest/guide/custom_images.html?utm_campaign=Github&utm_source=github)
 
 
+# SUAVE Dockerfiles
+
+The repository builds three local images from the repository root:
+
+```
+docker build -t kasm-jammy:dev -f docker/dockerfile-kasm-core-jammy .
+docker build -t suave:dev --build-arg BASE_IMAGE=kasm-jammy:dev -f docker/dockerfile-suave .
+docker build -t suave-headless:dev -f docker/dockerfile-suave-headless .
+```
+
+`dockerfile-suave-headless` imports external dependencies from `suave.repos` and copies the current checkout into the image, so local source changes can be tested without first pushing them upstream.
+
 # Manual Deployment
 
 To build the provided images:

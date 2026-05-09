@@ -49,6 +49,17 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
 
+      - name: Extract metadata (tags, labels) for Docker headless
+        id: meta_headless
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/kas-lab/suave-headless
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
       - name: Build and push kasm-jammy image
         uses: docker/build-push-action@v4
         with:
@@ -71,8 +82,8 @@ jobs:
       - name: Build and push suave headless image
         uses: docker/build-push-action@v4
         with:
-          context: suave_runner/docker/
-          file: suave_runner/docker/Dockerfile
+          context: .
+          file: docker/dockerfile-suave-headless
           push: true
-          tags: ${{ env.REGISTRY }}/kas-lab/suave-headless
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta_headless.outputs.tags }}
+          labels: ${{ steps.meta_headless.outputs.labels }}

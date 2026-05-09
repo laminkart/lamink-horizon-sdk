@@ -83,6 +83,8 @@ To build the docker images locally, run:
 ./build_docker_images.sh
 ```
 
+The script builds the browser image as `suave:dev` and the headless runner image as `suave-headless:dev` from the local checkout.
+
 ## Install SUAVE locally
 To install the exemplar locally, you have to [install Gazebo Harmonic](#install-gazebo-harmonic), [install ROS2 Humble](#install-ros2-humble), [install ArduSub](#install-ardusub), [install the ArduSub plugin](#install-ardusub_plugin), and finally [install the SUAVE workspace](#install-suave-workspace).
 
@@ -147,7 +149,7 @@ sudo apt install libopencv-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-
 ```
 
 ```Bash
-export GZ_VERSION=harmonic 
+export GZ_VERSION=harmonic
 sudo bash -c 'wget https://raw.githubusercontent.com/osrf/osrf-rosdep/master/gz/00-gazebo.list -O /etc/ros/rosdep/sources.list.d/00-gazebo.list'
 rosdep update
 rosdep resolve gz-harmonic
@@ -296,7 +298,7 @@ With SUAVE configured and sourced, start ArduSub, the simulation, and the SUAVE'
 
 Run:
 ```Bash
-sim_vehicle.py -L RATBeach -v ArduSub  --model=JSON --console
+sim_vehicle.py -L RATBeach -v ArduSub --model=JSON --console
 ```
 
 #### Start the simulation

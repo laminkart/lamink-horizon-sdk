@@ -27,21 +27,26 @@ A dialog will request a username and password, these are shown below, with the p
 
 ## Headless docker image
 
-We also provide a docker image without VCN/Web interface, so you can just run the experiments directly from your terminal without needing to log in into the web interface.
+We also provide a docker image without a VNC/Web interface, so you can run experiments directly from your terminal without logging in to the web interface.
 
 Pull image:
 ```Bash
 docker pull ghcr.io/kas-lab/suave-headless:main
 ```
 
-Run image (without gpu):
+Build the headless image locally from your current checkout:
 ```Bash
-docker run -it --rm --name suave_runner -e DISPLAY=$DISPLAY -e QT_X11_NO_MITSHM=1 -v /tmp/.X11-unix:/tmp/.X11-unix -v /etc/localtime:/etc/localtime:ro -v $HOME/suave_ws/src/suave:/home/ubuntu-user/suave_ws/src/suave suave-headless
+docker build -t suave-headless:dev -f docker/dockerfile-suave-headless .
 ```
 
-Run image (with nvidia)(don't forget to install nvidia docker toolkit)[https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html]:
+Run the local image without GPU:
 ```Bash
-docker run -it --rm --gpus all --runtime=nvidia --name suave_runner -e DISPLAY=$DISPLAY -e QT_X11_NO_MITSHM=1 -e NVIDIA_VISIBLE_DEVICES=all -e NVIDIA_DRIVER_CAPABILITIES=all -v /dev/dri:/dev/dri -v /tmp/.X11-unix:/tmp/.X11-unix -v /etc/localtime:/etc/localtime:ro -v $HOME/suave_ws/src/suave:/home/ubuntu-user/suave_ws/src/suave suave-headless
+docker run -it --rm --name suave_runner -e DISPLAY=$DISPLAY -e QT_X11_NO_MITSHM=1 -v /tmp/.X11-unix:/tmp/.X11-unix -v /etc/localtime:/etc/localtime:ro suave-headless:dev
+```
+
+Run the local image with NVIDIA GPU support. Install the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) first.
+```Bash
+docker run -it --rm --gpus all --runtime=nvidia --name suave_runner -e DISPLAY=$DISPLAY -e QT_X11_NO_MITSHM=1 -e NVIDIA_VISIBLE_DEVICES=all -e NVIDIA_DRIVER_CAPABILITIES=all -v /dev/dri:/dev/dri -v /tmp/.X11-unix:/tmp/.X11-unix -v /etc/localtime:/etc/localtime:ro suave-headless:dev
 ```
 
 You can try by running:
@@ -58,7 +63,7 @@ ros2 run suave_runner suave_runner \
   ]'
 ```
 
-If you want the image to have acess to the host GUI run the following command before running the image:
+If you want the image to have access to the host GUI, run the following command before running the image:
 ```Bash
 xhost +
 ```
@@ -69,3 +74,5 @@ To build the docker images locally, run:
 ```Bash
 ./build_docker_images.sh
 ```
+
+This builds `kasm-jammy:dev`, `suave:dev`, and `suave-headless:dev` from the repository root.
