@@ -47,15 +47,19 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR $HOME
 
+ARG ARDUSUB_COMMIT=571e8c7bd3793fce1bc5184a2f6586feb8a616e5
+ARG ARDUPILOT_GAZEBO_COMMIT=082a0fe231f6e63bc8d1598f1cba461d9e2ea7f5
+
+COPY --chown=ubuntu-user:ubuntu-user requirements.txt $HOME/requirements.txt
+
 # Install ArduSub
 RUN git clone https://github.com/ArduPilot/ardupilot.git
 WORKDIR $HOME/ardupilot
-# ArduSub 4.7 beta
-RUN git checkout 571e8c7bd3793fce1bc5184a2f6586feb8a616e5
+RUN git checkout $ARDUSUB_COMMIT
 RUN git submodule update --init --recursive
 RUN USER=ubuntu-user Tools/environment_install/install-prereqs-ubuntu.sh -y
 
-RUN sudo pip3 install -U mavproxy==1.8.74 PyYAML==6.0.3
+RUN pip3 install -r $HOME/requirements.txt
 
 ENV PATH=/opt/gcc-arm-none-eabi-10-2020-q4-major/bin:$PATH
 ENV PATH=$PATH:$HOME/ardupilot/Tools/autotest
@@ -79,7 +83,7 @@ RUN sudo apt-get update && sudo apt-get install -y \
 WORKDIR $HOME
 RUN git clone https://github.com/ArduPilot/ardupilot_gazebo && \
     cd ardupilot_gazebo && \
-    git checkout 082a0fe231f6e63bc8d1598f1cba461d9e2ea7f5 && \
+    git checkout $ARDUPILOT_GAZEBO_COMMIT && \
     mkdir build && cd build && \
     cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo && \
     make -j4
@@ -112,7 +116,6 @@ RUN ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash \
 
 RUN ["/bin/bash", "-c", "sudo ./src/mavros/mavros/scripts/install_geographiclib_datasets.sh"]
 
-RUN USER=ubuntu-user python3 -m pip install setuptools==75.8.2 packaging==24.1 empy==3.3.4 pandas==2.0.2 scipy==1.15.2 numpy==1.26.4
 RUN ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash \
     && colcon build --symlink-install \
     && echo 'source ~/suave_ws/install/setup.bash' >> ~/.bashrc"]

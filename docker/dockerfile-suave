@@ -7,9 +7,7 @@ USER root
 ENV DEBIAN_FRONTEND=noninteractive
 
 ###Add Sudo
-RUN add-apt-repository ppa:kisak/kisak-mesa \
-    && apt update \
-    && apt install -y \
+RUN apt update && apt install -y \
     sudo \
     tzdata\
     vim \
@@ -20,12 +18,12 @@ RUN add-apt-repository ppa:kisak/kisak-mesa \
     wmctrl \
     git \
     software-properties-common \
-    mesa-utils \
+    libgl1-mesa-glx \
+    libgl1-mesa-dri \
+    libglx-mesa0 \
     bash-completion \
     python3-pip \
-    && apt full-upgrade -y \
     && rm -rf /var/lib/apt/list/
-
 
 # Set the locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
@@ -34,17 +32,15 @@ ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
 
-RUN pip uninstall empy && pip install empy==3.3.4 && pip install -U colcon-common-extensions
-
 ### Install ROS2
 RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
 RUN apt update && apt install -y \
   ros-humble-ros-base \
-#   python3-empy=3.3.4-2 \
   python3-rosdep \
   python3-vcstool \
+  python3-colcon-common-extensions  \
   && rm -rf /var/lib/apt/lists/
 
 RUN rosdep init
@@ -69,21 +65,19 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR $HOME
 
+# Git commit SHAs — passed in by build_docker_images.sh from docker/versions.env
+ARG ARDUSUB_COMMIT=571e8c7bd3793fce1bc5184a2f6586feb8a616e5
+ARG ARDUPILOT_GAZEBO_COMMIT=082a0fe231f6e63bc8d1598f1cba461d9e2ea7f5
+COPY --chown=ubuntu-user:kasm-user requirements.txt $HOME/requirements.txt
+
 # Install ArduSub
 RUN git clone https://github.com/ArduPilot/ardupilot.git
 WORKDIR $HOME/ardupilot
-# Sub-4.5.1
-RUN git checkout 30257f01185471ab4c1ac544e47d1b4437e44c98
+RUN git checkout $ARDUSUB_COMMIT
 RUN git submodule update --init --recursive
 
 RUN USER=kasm-user Tools/environment_install/install-prereqs-ubuntu.sh -y
-
-# RUN rm $HOME/ardupilot/Tools/environment_install/install-prereqs-ubuntu.sh
-# RUN wget -P $HOME/ardupilot/Tools/environment_install/ https://raw.githubusercontent.com/ArduPilot/ardupilot/c623ae8b82db4d7e195f4b757e2ae5d049f941e5/Tools/environment_install/install-prereqs-ubuntu.sh
-# RUN chmod +x $HOME/ardupilot/Tools/environment_install/install-prereqs-ubuntu.sh
-# RUN USER=kasm-user Tools/environment_install/install-prereqs-ubuntu.sh -y
-
-RUN sudo pip3 install -U mavproxy PyYAML
+RUN pip3 install -r $HOME/requirements.txt
 
 ENV PATH=/opt/gcc-arm-none-eabi-10-2020-q4-major/bin:$PATH
 ENV PATH=$PATH:$HOME/ardupilot/Tools/autotest
@@ -103,10 +97,10 @@ RUN sudo apt update && sudo apt install -y \
     gstreamer1.0-gl \
     && sudo rm -rf /var/lib/apt/list/
 
-ENV GZ_VERSION=harmonic
 WORKDIR $HOME
 RUN git clone https://github.com/ArduPilot/ardupilot_gazebo && \
     cd ardupilot_gazebo && \
+    git checkout $ARDUPILOT_GAZEBO_COMMIT && \
     mkdir build && cd build && \
     cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo && \
     make -j4
@@ -128,6 +122,7 @@ COPY --chown=kasm-user:kasm-user suave_missions/ $HOME/suave_ws/src/suave/suave_
 COPY --chown=kasm-user:kasm-user suave_monitor/ $HOME/suave_ws/src/suave/suave_monitor/
 COPY --chown=kasm-user:kasm-user suave_msgs/ $HOME/suave_ws/src/suave/suave_msgs/
 COPY --chown=kasm-user:kasm-user suave_runner/ $HOME/suave_ws/src/suave/suave_runner/
+COPY --chown=kasm-user:kasm-user suave_tools/ $HOME/suave_ws/src/suave/suave_tools/
 
 # Install suave deps
 WORKDIR $HOME/suave_ws
@@ -136,9 +131,6 @@ RUN ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash \
     && rosdep install --from-paths src --ignore-src -r -y"]
 
 RUN ["/bin/bash", "-c", "sudo ./src/mavros/mavros/scripts/install_geographiclib_datasets.sh"]
-
-# RUN sudo pip uninstall empy -y && pip install empy==3.3.4
-RUN pip install "setuptools<80.0.0"
 
 # Build suave
 RUN ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash \
