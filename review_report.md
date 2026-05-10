@@ -20,7 +20,7 @@
 
 ## 1. Functional Bugs
 
-### 1.1 `MissionTimeConstrained.call_service()` is an exact duplicate of the parent
+### 1.1 ✅ `MissionTimeConstrained.call_service()` is an exact duplicate of the parent
 
 **File:** `suave_missions/suave_missions/time_constrained_mission.py`
 **Severity:** Medium
@@ -29,9 +29,12 @@
 
 **Fix:** Delete the method from `MissionTimeConstrained`; the parent implementation is already inherited.
 
+**Status:** Completed. `MissionTimeConstrained` no longer overrides
+`call_service()`, so service calls use `MissionPlanner.call_service()`.
+
 ---
 
-### 1.2 `suave_none.launch.py` — `result_path_arg` added twice
+### 1.2 ✅ `suave_none.launch.py` — `result_path_arg` added twice
 
 **File:** `suave_managing/suave_none/launch/suave_none.launch.py`
 **Severity:** Low (cosmetic/silent)
@@ -46,6 +49,10 @@ return LaunchDescription([
     ...
 ])
 ```
+
+**Status:** Completed. The duplicate `result_path_arg` entry was removed from
+the `LaunchDescription`, and a launch-structure regression test now asserts
+that launch arguments are declared once.
 
 ---
 
@@ -426,8 +433,8 @@ This always fetches the `.repos` file from the `main` branch HEAD, even when the
 
 | # | Area | Issue | Severity |
 |---|---|---|---|
-| 1.1 | Code quality | `call_service()` duplicated in subclass without change | Medium |
-| 1.2 | Bug | `result_path_arg` duplicated in `suave_none` launch list | Low |
+| 1.1 ✅ | Code quality | `call_service()` duplicated in subclass without change | Medium |
+| 1.2 ✅ | Bug | `result_path_arg` duplicated in `suave_none` launch list | Low |
 | 1.3 | Bug | `/tmp/mission.done` sentinel not cleared before each run | Medium |
 | 1.4 | Bug | `recover_thrusters_lc` leaks clients, callers never await results | **High** |
 | 1.5 | Reproducibility | Mutable branch refs in `suave.repos` for 3 deps | **High** |
@@ -472,7 +479,7 @@ This always fetches the `.repos` file from the `main` branch HEAD, even when the
 6. Call `remove_done_file()` before each individual run, not just each experiment.
 7. Replace JSON-in-YAML experiment config with native YAML nesting.
 8. ~~Add `set -e` to `build_docker_images.sh`.~~
-9. Delete the duplicate `call_service()` from `MissionTimeConstrained`.
+9. ~~Delete the duplicate `call_service()` from `MissionTimeConstrained`.~~
 10. Expose `random_seed` as a configurable ROS parameter and document the reproducibility intent.
 
 **Medium-term (maintainability):**
