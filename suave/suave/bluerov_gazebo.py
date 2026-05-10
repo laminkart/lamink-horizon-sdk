@@ -1,69 +1,63 @@
-from geometry_msgs.msg import Pose
+# Copyright 2026 KAS Lab
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""BlueROV Gazebo pose conversion helpers."""
+
+import copy
+
 from mavros_wrapper.ardusub_wrapper import BlueROVArduSubWrapper
 
 
 class BlueROVGazebo(BlueROVArduSubWrapper):
+    """BlueROV helper that sends Gazebo/map-frame position setpoints."""
+
     def __init__(self, node_name='bluerov_gz'):
+        """Create a BlueROV Gazebo helper node."""
         super().__init__(node_name)
-        self.gz_to_local_pose_delta = None
-        self.first_gz_pose = True
-        self.initial_x = None
-        self.initial_y = None
 
-        self.gazebo_pos_sub = self.create_subscription(
-            Pose, 'model/bluerov2/pose', self.gazebo_pos_cb, 10)
+        self.declare_parameter('ground_depth_gz', -20.0)
+        self.declare_parameter('altitude', 1.25)
 
-        # TODO: make this a ros param
-        self.ground_depth_gz = -20
-        self.altitude = 1.25
-
-    def gazebo_pos_cb(self, msg):
-        self.gazebo_pos = msg
-        if self.first_gz_pose is True:
-            self.first_gz_pose = False
-            self.initial_x = msg.position.x
-            self.initial_y = msg.position.y
-
-        if self.local_pos_received and self.status.mode == 'GUIDED':
-            self.gz_to_local_pose_delta = [
-                self.local_pos.pose.position.x - msg.position.x,
-                self.local_pos.pose.position.y - msg.position.y,
-                self.local_pos.pose.position.z - msg.position.z,
-            ]
-            self.destroy_subscription(self.gazebo_pos_sub)
-
-    def convert_gz_to_local_pose(self, gz_pose):
-        if self.gz_to_local_pose_delta is not None:
-            local_pose = Pose()
-            local_pose.position.x = \
-                gz_pose.position.x + self.gz_to_local_pose_delta[0]
-            local_pose.position.y = \
-                gz_pose.position.y + self.gz_to_local_pose_delta[1]
-            local_pose.position.z = \
-                gz_pose.position.z + self.gz_to_local_pose_delta[2]
-            return local_pose
-        else:
-            return gz_pose
+        self.ground_depth_gz = self.get_parameter('ground_depth_gz').value
+        self.altitude = self.get_parameter('altitude').value
 
     def setpoint_position_gz(self, gz_pose, fixed_altitude=True):
-        if self.gz_to_local_pose_delta is None:
+        """Send a Gazebo/map-frame position setpoint."""
+        if not self.local_pos_received:
             return None
 
+        pose = copy.deepcopy(gz_pose)
         if fixed_altitude:
-            gz_pose.position.z = self.ground_depth_gz + self.altitude
+            pose.position.z = self.ground_depth_gz + self.altitude
 
-        local_pose = self.convert_gz_to_local_pose(gz_pose)
         return self.setpoint_position_local(
-            x=local_pose.position.x,
-            y=local_pose.position.y,
-            z=local_pose.position.z)
+            pose.position.x, pose.position.y, pose.position.z,
+            fixed_altitude=False)
 
-    def setpoint_position_local(
-     self, x=.0, y=.0, z=.0, rx=.0, ry=.0, rz=.0, rw=1.0, fixed_altitude=True):
-        if fixed_altitude and self.gz_to_local_pose_delta is None:
+    def setpoint_position_local(self,
+                                x=.0,
+                                y=.0,
+                                z=.0,
+                                rx=.0,
+                                ry=.0,
+                                rz=.0,
+                                rw=1.0,
+                                fixed_altitude=True):
+        """Send a local/map-frame position setpoint."""
+        if fixed_altitude and not self.local_pos_received:
             return None
 
         if fixed_altitude:
-            z = self.ground_depth_gz + self.altitude \
-                + self.gz_to_local_pose_delta[2]
+            z = self.ground_depth_gz + self.altitude
         return super().setpoint_position_local(x, y, z)

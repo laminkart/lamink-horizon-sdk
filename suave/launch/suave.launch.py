@@ -16,29 +16,31 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     silent = LaunchConfiguration('silent')
+
     def configure_logging(context, *args, **kwargs):
         if silent.perform(context) == 'true':
             import logging
             logging.getLogger().setLevel(logging.ERROR)
         return []
-    
+
     silent_arg = DeclareLaunchArgument(
         'silent',
         default_value='false',
         description='Suppress all output (launch logs + node logs)'
     )
-    
+
     print_output = PythonExpression([
-        '"log" if "', LaunchConfiguration('silent'), '" == "true" else "', LaunchConfiguration('print_output'), '"'
+        '"log" if "',
+        LaunchConfiguration('silent'),
+        '" == "true" else "',
+        LaunchConfiguration('print_output'),
+        '"'
     ])
     print_output_arg = DeclareLaunchArgument(
         'print_output',
         default_value='screen',
         description='Whether to print output to terminal (screen/log)'
     )
-
-    task_bridge = LaunchConfiguration('task_bridge')
-    system_modes = LaunchConfiguration('system_modes')
 
     task_bridge_arg = DeclareLaunchArgument(
         'task_bridge',

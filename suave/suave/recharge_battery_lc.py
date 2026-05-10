@@ -85,6 +85,9 @@ class RechargeBattery(Node):
             station_pose,
             fixed_altitude=True)
 
+        if setpoint is None:
+            return
+
         if self.ardusub.check_setpoint_reached_xy(setpoint, 0.5):
             self.call_service(self.recharge_battery_cli, Trigger.Request())
             return

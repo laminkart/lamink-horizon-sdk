@@ -14,6 +14,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     silent = LaunchConfiguration('silent')
+
     def configure_logging(context, *args, **kwargs):
         if silent.perform(context) == 'true':
             import logging
@@ -31,7 +32,11 @@ def generate_launch_description():
         remaro_worlds_path, 'launch', 'small_min_pipes.launch.py')
 
     print_output = PythonExpression([
-        '"log" if "', LaunchConfiguration('silent'), '" == "true" else "', LaunchConfiguration('print_output'), '"'
+        '"log" if "',
+        LaunchConfiguration('silent'),
+        '" == "true" else "',
+        LaunchConfiguration('print_output'),
+        '"'
     ])
     print_output_arg = DeclareLaunchArgument(
         'print_output',

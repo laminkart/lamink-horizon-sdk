@@ -11,6 +11,7 @@ from geometry_msgs.msg import Pose
 from geometry_msgs.msg import PoseArray
 from suave_msgs.srv import GetPath
 
+
 class PipelineDetection(Node):
 
     def __init__(self):

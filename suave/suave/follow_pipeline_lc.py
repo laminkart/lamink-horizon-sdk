@@ -126,6 +126,12 @@ class PipelineFollowerLC(Node):
                 return
             setpoint = self.ardusub.setpoint_position_gz(
                 gz_pose, fixed_altitude=True)
+            while setpoint is None:
+                if self.abort_follow is True:
+                    return
+                timer.sleep()
+                setpoint = self.ardusub.setpoint_position_gz(
+                    gz_pose, fixed_altitude=True)
 
             count = 0
             while not self.ardusub.check_setpoint_reached_xy(setpoint, 0.5):
