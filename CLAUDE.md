@@ -28,7 +28,15 @@ Runtime stack: ROS 2 Humble · Gazebo Harmonic · ArduSub/ArduPilot SITL · MAVR
 
 ## Build & Test
 
-All commands run from the **ROS workspace root** (e.g. `/home/gus/ros_workspaces/suave_rebetmc_ws`), not from inside `src/suave`.
+Run anything related to SUAVE execution inside the `suave_runner` container, including tests, ROS launches, `colcon`, and direct `pytest` runs. The host machine is not assumed to have SUAVE or ROS dependencies installed. Use the container's default sourced workspace configuration; do not override `PYTHONPATH`, `ROS_LOG_DIR`, or similar ROS/Python environment variables unless the user explicitly asks.
+
+Default container command pattern:
+
+```bash
+docker exec suave_runner bash -lc 'cd /home/ubuntu-user/suave_ws && source /opt/ros/humble/setup.bash && source install/setup.bash && <command>'
+```
+
+All build/test commands run from the **ROS workspace root inside the container** (`/home/ubuntu-user/suave_ws`), not from inside `src/suave`.
 
 ```bash
 source /opt/ros/humble/setup.bash
@@ -58,6 +66,8 @@ python3 -m pytest -q <package>/test
 Lint tests are pytest wrappers around `ament_flake8`, `ament_pep257`, and `ament_copyright`.
 
 ## Running SUAVE
+
+Run SUAVE from inside the `suave_runner` container using the default workspace environment.
 
 ```bash
 # Quick example
@@ -127,6 +137,7 @@ When adding a new managing subsystem: include SUAVE's base launch with `task_bri
 ## Code Conventions
 
 **Python (`ament_python` packages):**
+- Python code must pass flake8 and pep257.
 - Nodes subclass `rclpy.node.Node`; declare/read ROS params in `__init__`; expose `main()` as console script entry point.
 - `snake_case` for functions/methods/variables/file names; `PascalCase` for classes.
 - No type hints unless they add clear value to surrounding context.
@@ -153,6 +164,7 @@ The VCS dependencies file is `suave.repos` (vcs format). The old name `suave.ros
 ## Before Finishing Changes
 
 - `git status --short` — distinguish own edits from pre-existing uncommitted experiment/Docker changes; do not revert unrelated work.
+- SUAVE validation must run inside `suave_runner` with the container's default sourced workspace environment; do not run ROS/SUAVE tests on the host.
 - Python changes: `colcon test --packages-select <pkg> --event-handlers console_direct+`.
 - C++/message changes: build then test.
 - Launch file changes: `python3 -m py_compile <launch_file.py>`.

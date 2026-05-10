@@ -6,6 +6,7 @@ General:
 - Prefer ASCII unless touching files that already require non-ASCII.
 
 Python:
+- Python code must pass flake8 and pep257.
 - Packages are ROS 2 `ament_python` packages using `setuptools.setup` and console script entry points.
 - Use `extras_require={'test': ['pytest']}` for pytest metadata; avoid reintroducing deprecated `tests_require`.
 - Code is mostly plain Python without type hints. Follow existing style unless introducing type hints locally adds clear value.
@@ -13,7 +14,7 @@ Python:
 - Existing style uses snake_case for functions, methods, variables, ROS parameters, and file names; PascalCase for classes.
 - String formatting often uses `.format(...)`; f-strings are acceptable if they do not make surrounding style inconsistent.
 - Lint tests use `ament_flake8` and `ament_pep257`. Keep imports PEP8-compatible, avoid trailing whitespace, and add docstrings where pep257 would require them in new public modules/classes/functions.
-- Tests are pytest-based. `suave_runner/test/test_suave_runner.py` exercises runner behavior with `rclpy.init()`/`rclpy.shutdown()` and temporary files under `/tmp/suave`.
+- Tests are pytest-based. ROS/SUAVE tests must run inside the `suave_runner` container using the default sourced workspace environment.
 
 C++ (`suave_bt`, `suave_msgs`):
 - `suave_bt` is C++17 with `-Wall -Wextra -Wpedantic` enabled. Headers are under `include/suave_bt`, implementation under `src/suave_bt`.
@@ -25,7 +26,7 @@ Launch/config:
 - Launch files are Python ROS launch descriptions and are installed by glob patterns in setup/CMake.
 - The simulation launch uses MAVROS `node.launch` with local lightweight config/plugin list YAML files. Keep launch args overrideable for `fcu_url`, `gcs_url`, `mavros_config_yaml`, and `mavros_pluginlists_yaml`.
 - When adding a new managing subsystem, include SUAVE's base launch with `task_bridge` disabled and wire it into `suave_missions/launch/mission.launch.py` through an `adaptation_manager` condition.
-- Mission config changes may require rebuilding the workspace with `colcon build --symlink-install`.
+- Mission config changes may require rebuilding the workspace with `colcon build --symlink-install` inside the `suave_runner` container.
 
 Docker:
 - Dockerfiles are intentionally lowercase (`docker/dockerfile-*`). The headless Dockerfile builds from the repository root and copies the local checkout after importing external deps from `suave.repos`.

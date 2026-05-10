@@ -2,15 +2,18 @@
 
 Before finishing code changes:
 - Check `git status --short` and distinguish own edits from pre-existing user edits. This repository is often used with uncommitted experiment/Docker changes, so avoid reverting unrelated changes.
-- For Python package changes, run `colcon test --packages-select <package_name> --event-handlers console_direct+` from the workspace root when ROS dependencies are available. For narrow pure-Python logic, `python3 -m pytest -q <package>/test` can be useful after sourcing/installing dependencies.
-- For C++/message package changes, run `colcon build --symlink-install --packages-select <package_name>` and then `colcon test --packages-select <package_name> --event-handlers console_direct+`.
-- After `colcon test`, run `colcon test-result --verbose` if failures occur or to summarize results.
+- SUAVE validation must run inside the `suave_runner` Docker container. Do not run ROS/SUAVE tests, launches, `colcon`, or direct SUAVE `pytest` on the host; the host is not assumed to have SUAVE installed.
+- Use the container's default sourced workspace configuration. Do not override `PYTHONPATH`, `ROS_LOG_DIR`, or similar ROS/Python environment variables unless explicitly requested.
+- Default validation wrapper: `docker exec suave_runner bash -lc 'cd /home/ubuntu-user/suave_ws && source /opt/ros/humble/setup.bash && source install/setup.bash && <command>'`.
+- For Python package changes, run inside the container: `colcon test --packages-select <package_name> --event-handlers console_direct+`. For narrow focused tests, direct `python3 -m pytest -q -rs src/suave/<package>/test/<test_file>.py` is acceptable inside the same sourced container workspace.
+- For C++/message package changes, run inside the container: `colcon build --symlink-install --packages-select <package_name>` and then `colcon test --packages-select <package_name> --event-handlers console_direct+`.
+- After `colcon test`, run `colcon test-result --verbose` inside the container if failures occur or to summarize results.
 - If mission config, launch, or package data files change, verify they are included in the relevant `setup.py` `data_files` or CMake `install()` rules.
 - If adding/changing console scripts, verify `setup.py` entry points and package dependencies in `package.xml`.
-- For launch changes, at minimum run `python3 -m py_compile <launch_file.py>`; for YAML config changes, parse the touched YAML files with Python/YAML if available.
+- For launch changes, at minimum run `python3 -m py_compile <launch_file.py>` inside the container; for YAML config changes, parse the touched YAML files inside the container if available.
 - For Dockerfile or Docker script changes, run `docker build --check` on the affected Dockerfile when possible. For `docker/dockerfile-suave`, use `--build-arg BASE_IMAGE=kasm-jammy:dev` if GHCR cannot authorize the default base. When updating pinned versions: git SHAs go in `docker/versions.env`, Python package versions go in `requirements.txt` (repo root).
 - When updating README installation steps, Docker commands, or runner documentation, also apply the same changes to the matching page in `docs/source/` (Sphinx GitHub Pages site). The two must stay in sync.
-- For shell script changes, run `bash -n <script>`.
+- For shell script changes, run `bash -n <script>` inside the container when the script belongs to SUAVE runtime/build workflows.
 - If touching MAVROS simulation wiring, preserve the working default `fcu_url` of `udp://0.0.0.0:14550@14555` unless intentionally changing the `sim_vehicle` port setup.
 - If adding a new managing subsystem, verify ROS interface compatibility with `/diagnostics`, `/task/request`, `/task/cancel`, and the system_modes change mode services.
-- Note any tests that could not be run because ROS/Gazebo/ArduSub/MAVROS/Docker dependencies are unavailable in the current environment.
+- Note any tests that could not be run because the `suave_runner` container is unavailable or missing required Gazebo/ArduSub/MAVROS/Docker dependencies.
