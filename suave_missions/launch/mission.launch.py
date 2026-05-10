@@ -1,3 +1,17 @@
+# Copyright 2026 KAS Lab
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 
 from ament_index_python.packages import get_package_share_directory
@@ -6,18 +20,11 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import IncludeLaunchDescription
 from launch.conditions import LaunchConfigurationEquals
-from launch.conditions import LaunchConfigurationNotEquals
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
-from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    adaptation_manager = LaunchConfiguration('adaptation_manager')
-    mission_type = LaunchConfiguration('mission_type')
-    result_filename = LaunchConfiguration('result_filename')
-    battery_constraint = LaunchConfiguration('battery_constraint')
-    battery_constraint_value = LaunchConfiguration('battery_constraint_value')
     mc_reasoning_time_filename = LaunchConfiguration('mc_reasoning_time_filename')
 
     adaptation_manager_arg = DeclareLaunchArgument(
@@ -74,7 +81,7 @@ def generate_launch_description():
         'launch',
         'suave_random.launch.py'
     )
-    
+
     pkg_suave_none_path = get_package_share_directory(
         'suave_none')
     suave_none_launch_path = os.path.join(
@@ -82,7 +89,7 @@ def generate_launch_description():
         'launch',
         'suave_none.launch.py'
     )
-    
+
     pkg_suave_bt_path = get_package_share_directory(
         'suave_bt')
     suave_bt_launch_path = os.path.join(
@@ -93,19 +100,19 @@ def generate_launch_description():
 
     suave_metacontrol_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(suave_metacontrol_launch_path),
-        launch_arguments = {
-            'reasoning_time_filename' : mc_reasoning_time_filename}.items(),
+        launch_arguments={
+            'reasoning_time_filename': mc_reasoning_time_filename}.items(),
         condition=LaunchConfigurationEquals(
             'adaptation_manager', 'metacontrol'))
 
     suave_random_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(suave_random_launch_path),
         condition=LaunchConfigurationEquals('adaptation_manager', 'random'))
-    
+
     suave_none_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(suave_none_launch_path),
         condition=LaunchConfigurationEquals('adaptation_manager', 'none'))
-    
+
     suave_bt_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(suave_bt_launch_path),
         condition=LaunchConfigurationEquals('adaptation_manager', 'bt'))

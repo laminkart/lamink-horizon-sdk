@@ -12,26 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
-import rclpy
-from rclpy.executors import MultiThreadedExecutor
-from suave_missions.inspection_mission import InspectionMission
+"""Tests for the time-constrained mission planner."""
+
+from suave_missions.mission_planner import MissionPlanner
+from suave_missions.time_constrained_mission import MissionTimeConstrained
 
 
-def main():
-
-    rclpy.init(args=sys.argv)
-
-    mission_node = InspectionMission()
-
-    mt_executor = MultiThreadedExecutor()
-    mt_executor.add_node(mission_node)
-    mt_executor.create_task(mission_node.perform_mission)
-    mt_executor.spin()
-
-    mission_node.destroy_node()
-    rclpy.shutdown()
-
-
-if __name__ == '__main__':
-    main()
+def test_time_constrained_mission_inherits_call_service():
+    """Verify the time-constrained mission uses the parent service helper."""
+    assert 'call_service' not in MissionTimeConstrained.__dict__
+    assert MissionTimeConstrained.call_service is MissionPlanner.call_service
