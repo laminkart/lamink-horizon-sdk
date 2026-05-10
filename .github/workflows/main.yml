@@ -7,16 +7,27 @@ on:
 
 jobs:
   build_docker:
-    name: Build suave pkg
+    name: Build suave pkgs
     runs-on: ubuntu-latest
     container:
       image: rostooling/setup-ros-docker:ubuntu-jammy-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Build pkg
+      - name: Build pkgs
         uses: ros-tooling/action-ros-ci@0.3.5
         with:
-          package-name: suave
+          package-name: |
+            suave
+            suave_bt
+            suave_metacontrol
+            suave_metrics
+            suave_missions
+            suave_monitor
+            suave_msgs
+            suave_none
+            suave_random
+            suave_runner
+            suave_tools
           target-ros2-distro: humble
           vcs-repo-file-url: ${{ github.workspace }}/suave.repos
