@@ -106,27 +106,14 @@ apt install ros-humble-ros-gzharmonic
 ArduSub is a subproject within ArduPilot for piloting underwater vehicles.
 
 **Disclaimer:**
-Problems may occur with different combinations of ArduPilot and MavROS versions. This repo was tested with [this ArduPilot commit](https://github.com/ArduPilot/ardupilot/tree/94ba4ece5f9ccdf632b95938f8e644a622f5ee75) and [mavros 2.4.0](https://github.com/mavlink/mavros/tree/01eccd8). Unfortunately, at least at the time of writing this README, the releases available in Ubuntu 22.04 do not match.
+Problems may occur with different combinations of ArduPilot and MavROS versions. This repo was tested with [ArduSub commit `571e8c7`](https://github.com/ArduPilot/ardupilot/tree/571e8c7bd3793fce1bc5184a2f6586feb8a616e5) (ArduSub 4.7.0-beta4) and [mavros 2.14.0](https://github.com/mavlink/mavros/tree/2.14.0).
 
 ```Bash
 cd ~/
 git clone https://github.com/ArduPilot/ardupilot.git
 cd ardupilot
-git checkout 2dd0bb7d4c85ac48437f139d66df648fc0e1d4ae
+git checkout 571e8c7bd3793fce1bc5184a2f6586feb8a616e5
 git submodule update --init --recursive
-```
-
-Note that the script used to install prerequisites available for this
-version of ArduSub does not work in Ubuntu 22.04. Therefore, you need to replace them before
-running ArduSub. To install the ArduPilot prerequisites, do the following.
-
-```Bash
-cd ~/ardupilot
-cd Tools/environment_install/
-rm install-prereqs-ubuntu.sh
-wget https://raw.githubusercontent.com/ArduPilot/ardupilot/master/Tools/environment_install/install-prereqs-ubuntu.sh
-cd ~/ardupilot
-chmod +x Tools/environment_install/install-prereqs-ubuntu.sh
 Tools/environment_install/install-prereqs-ubuntu.sh -y
 . ~/.profile
 ```
@@ -163,6 +150,7 @@ Clone and build the repository:
 cd ~/
 git clone https://github.com/ArduPilot/ardupilot_gazebo
 cd ardupilot_gazebo
+git checkout 082a0fe231f6e63bc8d1598f1cba461d9e2ea7f5
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo
 make -j4
@@ -206,11 +194,16 @@ vcs import src < suave.rosinstall --recursive
 Before building the `ros_gz` package (one of the dependencies), you need to export the gazebo version:
 
 ```
-export GZ_VERSION="garden"
+export GZ_VERSION="harmonic"
 ```
 You can also add this to your `~/.bashrc` to make this process easier.
 
-Install the dependencies:
+Install Python dependencies:
+```Bash
+pip install -r src/suave/requirements.txt
+```
+
+Install the ROS dependencies:
 ```Bash
 source /opt/ros/humble/setup.bash
 cd ~/suave_ws/
