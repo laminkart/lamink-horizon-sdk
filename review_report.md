@@ -134,12 +134,17 @@ The config key `adapt_period` does not match the declared parameter `adaptation_
 
 ---
 
-### 1.7 `water_visibiity_threshold` spelling error propagated
+### 1.7 ✅ `water_visibiity_threshold` spelling error propagated
 
 **Files:** `suave_missions/config/mission_config.yaml`, `suave_missions/config/runner_mission_config.yaml`, `suave_metrics/suave_metrics/mission_metrics.py`
 **Severity:** Low
 
 The parameter is declared and read with the same misspelling (`visibiity`, missing one `l`) consistently across YAML and Python, so it works — but it is confusing for users who try to set this parameter by spelling it correctly. ROS 2 would silently use the default value if a user provides the correctly-spelled version.
+
+**Status:** Completed. Mission configs now use
+`water_visibility_threshold`, and `MissionMetrics` declares/reads the
+correctly spelled parameter while retaining the old misspelled key as a
+backward-compatible fallback.
 
 ---
 
@@ -439,7 +444,7 @@ This always fetches the `.repos` file from the `main` branch HEAD, even when the
 | 1.4 | Bug | `recover_thrusters_lc` leaks clients, callers never await results | **High** |
 | 1.5 | Reproducibility | Mutable branch refs in `suave.repos` for 3 deps | **High** |
 | 1.6 ✅ | Bug | `adapt_period` vs `adaptation_period` mismatch — config ignored | Medium |
-| 1.7 | Quality | `water_visibiity_threshold` spelling error propagated | Low |
+| 1.7 ✅ | Quality | `water_visibiity_threshold` spelling error propagated | Low |
 | 1.8 | Quality | Hardcoded depth constant with unresolved TODO | Low |
 | 2.1 | Reuse | ~80% launch file boilerplate across 4 managing subsystems | Medium |
 | 2.2 | Design | Managing subsystem launches own mission infrastructure | Medium |

@@ -1,6 +1,6 @@
 /mission_metrics:
   ros__parameters:
-    water_visibiity_threshold: [3.25, 2.25, 1.25]
+    water_visibility_threshold: [3.25, 2.25, 1.25]
     expected_altitude: [3.0, 2.0, 1.0]
     battery_limit: 0.25
 
