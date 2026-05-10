@@ -22,12 +22,18 @@ Running SUAVE:
 - MAVROS launch args include `fcu_url`, `gcs_url`, `mavros_config_yaml`, and `mavros_pluginlists_yaml`; defaults use the local lightweight ArduPilot config in `suave/config/`.
 - Start default mission: `ros2 launch suave_missions mission.launch.py`.
 - Start mission with manager: `ros2 launch suave_missions mission.launch.py adaptation_manager:=bt result_filename:=measurement_1`.
-- Runner launch: `ros2 launch suave_runner suave_runner.launch.py`.
+- Runner launch (ROS2, config-file driven — preferred for campaigns): `ros2 launch suave_runner suave_runner.launch.py`.
+- Runner config: `suave_runner/config/runner_config.yml` — controls experiments list, disturbance timing, result_path, GUI flag. Results default to `~/suave/results/`.
+- Shell runner (simple positional args): `cd runner && ./runner.sh [true|false] [metacontrol|random|none|bt] [time|distance] <runs>`.
+- Headless shell runner: `./headless_runner.sh` — same args but uses `screen` instead of `xfce4-terminal`.
 - Runner CLI examples are in `docs/source/run.md` and `suave_runner/README.md`.
 
 Docker:
 - Pull/run main GUI image: `docker run -it --shm-size=512m -p 6901:6901 -e VNC_PW=password --security-opt seccomp=unconfined ghcr.io/kas-lab/suave:main`.
-- Build local images: `./build_docker_images.sh`.
+- GUI image user: `kasm-user`; results at `/home/kasm-user/suave/results`.
+- Headless image (`ghcr.io/kas-lab/suave-headless:main`) user: `ubuntu-user`; results at `/home/ubuntu-user/suave/results`. Has no CMD — pass the runner command explicitly.
+- Run headless non-interactively: `docker run -it --shm-size=512m -v $HOME/suave_results:/home/ubuntu-user/suave/results ghcr.io/kas-lab/suave-headless:main ./runner/headless_runner.sh false metacontrol time 2`.
+- Build local images: `./build_docker_images.sh` (sources `docker/versions.env` for git SHA build-args).
 - Build just the headless image from the repo root: `docker build -t suave-headless:dev -f docker/dockerfile-suave-headless .`.
 - Build-check headless Dockerfile: `docker build --check -f docker/dockerfile-suave-headless .`.
 - Build-check browser Dockerfile with local base: `docker build --check --build-arg BASE_IMAGE=kasm-jammy:dev -f docker/dockerfile-suave .`.

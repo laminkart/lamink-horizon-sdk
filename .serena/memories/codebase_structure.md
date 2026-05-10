@@ -1,8 +1,11 @@
 # Codebase Structure
 
 Top-level folders/files:
-- `README.md`, `docs/source/*.md`: main user/developer documentation for install, run, Docker, extending SUAVE, troubleshooting.
-- `suave.repos`: VCS dependency file used by CI, workspace setup, and Docker image builds for external deps.
+- `README.md`: comprehensive user/developer documentation (install, run, Docker, extend, troubleshoot). Keep in sync with `docs/source/`.
+- `docs/source/`: Sphinx GitHub Pages site mirroring README content. Pages: `installation`, `docker`, `run`, `architecture`, `extend`, `implementations`, `metrics`, `troubleshooting`, `related`, `citing`, `api`. Changes to installation steps, Docker commands, or runner docs must be reflected in both.
+- `suave.repos`: VCS dependency file used by CI, workspace setup, and Docker image builds for external deps. The old name `suave.rosinstall` is obsolete — do not reference it.
+- `docker/versions.env`: shell-sourceable file with pinned git SHAs (`ARDUSUB_COMMIT`, `ARDUPILOT_GAZEBO_COMMIT`). Sourced by `build_docker_images.sh` and forwarded as `--build-arg` to both Dockerfiles.
+- `requirements.txt` (repo root): pinned Python package versions for all images and local installs. Both Dockerfiles `COPY` and `pip install -r` this file.
 - `docker/`: Docker/Kasm image definitions and install scripts. Important files include `docker/dockerfile-kasm-core-jammy`, `docker/dockerfile-suave`, `docker/dockerfile-suave-headless`, and `docker/src/ubuntu/install/kasm_vnc/install_kasm_vnc.sh`.
 - `runner/`: shell scripts for running the exemplar and experiments.
 - `.github/workflows/`: CI; `main.yml` uses `ros-tooling/action-ros-ci` targeting ROS 2 Humble, and `container.yml` builds/pushes the browser and headless images.
@@ -22,5 +25,9 @@ ROS packages:
 
 Configuration:
 - Mission configs live in `suave_missions/config/*.yaml`.
-- Runner config lives in `suave_runner/config/runner_config.yml`.
+- Runner config lives in `suave_runner/config/runner_config.yml` — controls experiments list, disturbance timing, result_path, GUI flag.
 - Package data is installed through each package's `setup.py` or `CMakeLists.txt`.
+
+Known external managing subsystem implementations:
+- `suave_rosa` (https://github.com/kas-lab/rosa): knowledge-based, uses TypeDB; paper in Frontiers in Robotics and AI (2025).
+- `suave_planta` (https://github.com/kas-lab/suave_planta): PDDL-based, TOMASys ontology → PDDL translation, PlanSys2 for planning/execution.
