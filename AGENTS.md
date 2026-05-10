@@ -82,7 +82,25 @@ When adding a managing subsystem, include SUAVE's base launch with `task_bridge`
 
 ## Coding Style & Naming Conventions
 
-Python packages use `ament_python`, `rclpy`, four-space indentation, snake_case modules/functions/parameters, and PascalCase classes. Python code must pass flake8 and pep257. Nodes subclass `rclpy.node.Node`, declare/read ROS parameters in `__init__`, expose module-level `main()` entry points, and register console scripts in `setup.py`. Use `extras_require={'test': ['pytest']}` rather than deprecated `tests_require`. Keep imports PEP8/flake8-clean and add pep257 docstrings for new public modules, classes, and functions. Avoid type hints unless they add clear value to the surrounding code.
+Python packages use `ament_python`, `rclpy`, four-space indentation, snake_case modules/functions/parameters, and PascalCase classes. Python code must pass flake8 and pep257. Add this Apache-2.0 header to Python files:
+
+```python
+# Copyright 2026 KAS Lab
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+```
+
+Nodes subclass `rclpy.node.Node`, declare/read ROS parameters in `__init__`, expose module-level `main()` entry points, and register console scripts in `setup.py`. Use `extras_require={'test': ['pytest']}` rather than deprecated `tests_require`. Keep imports PEP8/flake8-clean and add pep257 docstrings for new public modules, classes, and functions. Avoid type hints unless they add clear value to the surrounding code.
 
 C++ code in `suave_bt` targets C++17 with `-Wall -Wextra -Wpedantic`; package headers live under `include/suave_bt/`, implementations under `src/suave_bt/`, BT node names are registered in `src/suave_bt.cpp`, and XML trees live in `bts/`. `suave_msgs` is an `ament_cmake` package.
 

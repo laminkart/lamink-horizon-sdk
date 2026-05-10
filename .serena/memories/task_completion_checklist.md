@@ -5,6 +5,7 @@ Before finishing code changes:
 - SUAVE validation must run inside the `suave_runner` Docker container. Do not run ROS/SUAVE tests, launches, `colcon`, or direct SUAVE `pytest` on the host; the host is not assumed to have SUAVE installed.
 - Use the container's default sourced workspace configuration. Do not override `PYTHONPATH`, `ROS_LOG_DIR`, or similar ROS/Python environment variables unless explicitly requested.
 - Default validation wrapper: `docker exec suave_runner bash -lc 'cd /home/ubuntu-user/suave_ws && source /opt/ros/humble/setup.bash && source install/setup.bash && <command>'`.
+- Python files should include the standard `Copyright 2026 KAS Lab` Apache-2.0 header.
 - For Python package changes, run inside the container: `colcon test --packages-select <package_name> --event-handlers console_direct+`. For narrow focused tests, direct `python3 -m pytest -q -rs src/suave/<package>/test/<test_file>.py` is acceptable inside the same sourced container workspace.
 - For C++/message package changes, run inside the container: `colcon build --symlink-install --packages-select <package_name>` and then `colcon test --packages-select <package_name> --event-handlers console_direct+`.
 - After `colcon test`, run `colcon test-result --verbose` inside the container if failures occur or to summarize results.
