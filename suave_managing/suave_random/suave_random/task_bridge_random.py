@@ -12,8 +12,8 @@ class TaskBridgeRandom(TaskBridgeNone):
     def __init__(self):
         super().__init__()
 
-        self.declare_parameter('adaptation_period', 15)
-        self.adaptation_period = self.get_parameter('adaptation_period').value
+        self.declare_parameter('adapt_period', 15)
+        self.adaptation_period = self.get_parameter('adapt_period').value
 
         self.generate_path_modes_cli = self.create_client(
             GetAvailableModes,

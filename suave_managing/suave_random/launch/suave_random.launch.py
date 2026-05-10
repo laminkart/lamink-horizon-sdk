@@ -19,12 +19,13 @@ def generate_launch_description():
         default_value='false',
         description='Suppress all output (launch logs + node logs)'
     )
+
     def configure_logging(context, *args, **kwargs):
         if silent.perform(context) == 'true':
             import logging
             logging.getLogger().setLevel(logging.CRITICAL)
         return []
-    
+
     result_path = LaunchConfiguration('result_path')
     result_path_arg = DeclareLaunchArgument(
         'result_path',
@@ -69,6 +70,7 @@ def generate_launch_description():
     task_bridge_node = Node(
         package='suave_random',
         executable='task_bridge_random',
+        name='task_bridge',
         parameters=[mission_config],
     )
 

@@ -29,7 +29,7 @@ setup(
     entry_points={
         'console_scripts': [
             'task_bridge_random = ' +
-                ' suave_random.task_bridge_random:main',
+            ' suave_random.task_bridge_random:main',
         ],
     },
 )
