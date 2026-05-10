@@ -29,10 +29,18 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Load version pins from versions.env
+        run: |
+          set -a
+          source docker/versions.env
+          set +a
+          echo "ARDUSUB_COMMIT=$ARDUSUB_COMMIT" >> $GITHUB_ENV
+          echo "ARDUPILOT_GAZEBO_COMMIT=$ARDUPILOT_GAZEBO_COMMIT" >> $GITHUB_ENV
 
       - name: Log in to the Container registry
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -40,7 +48,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
@@ -51,7 +59,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker headless
         id: meta_headless
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/kas-lab/suave-headless
           tags: |
@@ -61,7 +69,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
 
       - name: Build and push kasm-jammy image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: docker/dockerfile-kasm-core-jammy
@@ -70,20 +78,26 @@ jobs:
           labels: latest
 
       - name: Build and push suave image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: docker/dockerfile-suave
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: BASE_IMAGE=${{ env.REGISTRY }}/kas-lab/kasm-jammy:latest
+          build-args: |
+            BASE_IMAGE=${{ env.REGISTRY }}/kas-lab/kasm-jammy:latest
+            ARDUSUB_COMMIT=${{ env.ARDUSUB_COMMIT }}
+            ARDUPILOT_GAZEBO_COMMIT=${{ env.ARDUPILOT_GAZEBO_COMMIT }}
 
       - name: Build and push suave headless image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: docker/dockerfile-suave-headless
           push: true
           tags: ${{ steps.meta_headless.outputs.tags }}
           labels: ${{ steps.meta_headless.outputs.labels }}
+          build-args: |
+            ARDUSUB_COMMIT=${{ env.ARDUSUB_COMMIT }}
+            ARDUPILOT_GAZEBO_COMMIT=${{ env.ARDUPILOT_GAZEBO_COMMIT }}
