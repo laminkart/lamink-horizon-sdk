@@ -30,8 +30,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'task_bridge_metacontrol = ' +
-                ' suave_metacontrol.task_bridge_metacontrol:main',
+            'task_bridge_metacontrol = '
+            'suave_metacontrol.task_bridge_metacontrol:main',
         ],
     },
 )

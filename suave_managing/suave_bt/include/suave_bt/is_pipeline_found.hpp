@@ -28,7 +28,8 @@ namespace suave_bt
 class IsPipelineFound : public BT::ConditionNode
 {
 public:
-  explicit IsPipelineFound(const std::string & xml_tag_name,
+  explicit IsPipelineFound(
+    const std::string & xml_tag_name,
     const BT::NodeConfig & conf);
 
   BT::NodeStatus tick() override;
@@ -46,7 +47,7 @@ private:
   suave_bt::SuaveMission::SharedPtr _node;
   rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr pipeline_detection_sub_;
 
-  void pipeline_detected_cb(const std_msgs::msg::Bool &msg);
+  void pipeline_detected_cb(const std_msgs::msg::Bool & msg);
 };
 
 }  // namespace suave_bt

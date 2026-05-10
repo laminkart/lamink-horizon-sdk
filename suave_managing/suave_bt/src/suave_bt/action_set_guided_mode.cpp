@@ -17,53 +17,53 @@
 
 namespace suave_bt
 {
-  using namespace std::placeholders;
-  using namespace std::chrono_literals;
+using namespace std::placeholders;
+using namespace std::chrono_literals;
 
-  SetGuidedMode::SetGuidedMode(
-    const std::string& name, const BT::NodeConfig & conf)
-  : BT::StatefulActionNode(name, conf)
-  {
-    _node = config().blackboard->get<std::shared_ptr<suave_bt::SuaveMission>>("node");
-    set_guided_cli_ = _node->create_client<mavros_msgs::srv::SetMode>(
-      "mavros/set_mode");
-    mavros_state_sub_  = _node->create_subscription<mavros_msgs::msg::State>(
-      "mavros/state",
-      10,
-      std::bind(&SetGuidedMode::state_cb, this, _1));
-  }
+SetGuidedMode::SetGuidedMode(
+  const std::string & name, const BT::NodeConfig & conf)
+: BT::StatefulActionNode(name, conf)
+{
+  _node = config().blackboard->get<std::shared_ptr<suave_bt::SuaveMission>>("node");
+  set_guided_cli_ = _node->create_client<mavros_msgs::srv::SetMode>(
+    "mavros/set_mode");
+  mavros_state_sub_ = _node->create_subscription<mavros_msgs::msg::State>(
+    "mavros/state",
+    10,
+    std::bind(&SetGuidedMode::state_cb, this, _1));
+}
 
-  void
-  SetGuidedMode::state_cb(const mavros_msgs::msg::State &msg)
-  {
-    mode_ = msg.mode;
-  }
+void
+SetGuidedMode::state_cb(const mavros_msgs::msg::State & msg)
+{
+  mode_ = msg.mode;
+}
 
 
-  BT::NodeStatus SetGuidedMode::onRunning(){
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+BT::NodeStatus SetGuidedMode::onRunning()
+{
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
-    if(set_guided_cli_->service_is_ready()){
-      auto request = std::make_shared<mavros_msgs::srv::SetMode::Request>();
-      request->custom_mode = "GUIDED";
-      auto set_guided_result_ = set_guided_cli_->async_send_request(request);
+  if (set_guided_cli_->service_is_ready()) {
+    auto request = std::make_shared<mavros_msgs::srv::SetMode::Request>();
+    request->custom_mode = "GUIDED";
+    auto set_guided_result_ = set_guided_cli_->async_send_request(request);
 
-      if (set_guided_result_.wait_for(1s) == std::future_status::ready)
-      {
-        auto result_ = set_guided_result_.get();
-        if(!result_->mode_sent){
-          return BT::NodeStatus::FAILURE;
-        }
-
-        if(result_->mode_sent && mode_ == "GUIDED"){
-          RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Mode set to GUIDED!");
-          return BT::NodeStatus::SUCCESS;
-        }
-      } else {
+    if (set_guided_result_.wait_for(1s) == std::future_status::ready) {
+      auto result_ = set_guided_result_.get();
+      if (!result_->mode_sent) {
         return BT::NodeStatus::FAILURE;
       }
-    }
 
-    return BT::NodeStatus::RUNNING;
+      if (result_->mode_sent && mode_ == "GUIDED") {
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Mode set to GUIDED!");
+        return BT::NodeStatus::SUCCESS;
+      }
+    } else {
+      return BT::NodeStatus::FAILURE;
+    }
   }
+
+  return BT::NodeStatus::RUNNING;
+}
 } //namespace suave_bt

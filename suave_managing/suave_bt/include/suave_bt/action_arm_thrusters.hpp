@@ -26,16 +26,17 @@
 namespace suave_bt
 {
 
-class ArmThrusters : public BT::StatefulActionNode{
+class ArmThrusters : public BT::StatefulActionNode
+{
 
 public:
-  ArmThrusters(const std::string& name, const BT::NodeConfig & conf);
+  ArmThrusters(const std::string & name, const BT::NodeConfig & conf);
 
   BT::NodeStatus onRunning() override;
 
-  BT::NodeStatus onStart() override {return BT::NodeStatus::RUNNING;};
+  BT::NodeStatus onStart() override {return BT::NodeStatus::RUNNING;}
 
-  void onHalted() override {};
+  void onHalted() override {}
 
   static BT::PortsList providedPorts()
   {

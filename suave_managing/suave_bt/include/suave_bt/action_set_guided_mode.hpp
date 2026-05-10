@@ -28,14 +28,15 @@
 namespace suave_bt
 {
 
-class SetGuidedMode : public BT::StatefulActionNode{
+class SetGuidedMode : public BT::StatefulActionNode
+{
 
 public:
-  SetGuidedMode(const std::string& name, const BT::NodeConfig & conf);
+  SetGuidedMode(const std::string & name, const BT::NodeConfig & conf);
 
-  BT::NodeStatus onStart() override {return BT::NodeStatus::RUNNING;};
+  BT::NodeStatus onStart() override {return BT::NodeStatus::RUNNING;}
 
-  void onHalted() override {};
+  void onHalted() override {}
 
   BT::NodeStatus onRunning() override;
 
@@ -51,7 +52,7 @@ protected:
   suave_bt::SuaveMission::SharedPtr _node;
   rclcpp::Client<mavros_msgs::srv::SetMode>::SharedPtr set_guided_cli_;
   rclcpp::Subscription<mavros_msgs::msg::State>::SharedPtr mavros_state_sub_;
-  void state_cb(const mavros_msgs::msg::State &msg);
+  void state_cb(const mavros_msgs::msg::State & msg);
 };
 
 }  // namespace suave_bt

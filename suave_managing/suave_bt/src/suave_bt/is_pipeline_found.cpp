@@ -26,14 +26,14 @@ IsPipelineFound::IsPipelineFound(
 {
   _node = config().blackboard->get<std::shared_ptr<suave_bt::SuaveMission>>("node");
 
-  pipeline_detection_sub_  = _node->create_subscription<std_msgs::msg::Bool>(
+  pipeline_detection_sub_ = _node->create_subscription<std_msgs::msg::Bool>(
     "/pipeline/detected",
     10,
     std::bind(&IsPipelineFound::pipeline_detected_cb, this, _1));
 }
 
 void
-IsPipelineFound::pipeline_detected_cb(const std_msgs::msg::Bool &msg)
+IsPipelineFound::pipeline_detected_cb(const std_msgs::msg::Bool & msg)
 {
   _pipeline_detected = msg.data;
 }
@@ -41,7 +41,7 @@ IsPipelineFound::pipeline_detected_cb(const std_msgs::msg::Bool &msg)
 BT::NodeStatus
 IsPipelineFound::tick()
 {
-  return (_pipeline_detected==true) ? BT::NodeStatus::SUCCESS : BT::NodeStatus::FAILURE;
+  return (_pipeline_detected == true) ? BT::NodeStatus::SUCCESS : BT::NodeStatus::FAILURE;
 }
 
 }  // namespace suave_bt

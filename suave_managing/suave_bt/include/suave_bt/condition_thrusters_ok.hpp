@@ -49,7 +49,7 @@ private:
 
   std::map<std::string, bool> thrusters_ok_;
   rclcpp::Subscription<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr diagnostics_sub_;
-  void diagnostics_cb(const diagnostic_msgs::msg::DiagnosticArray &msg);
+  void diagnostics_cb(const diagnostic_msgs::msg::DiagnosticArray & msg);
 };
 
 } //namespace suave_bt

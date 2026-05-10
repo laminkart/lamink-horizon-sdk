@@ -27,10 +27,11 @@
 namespace suave_bt
 {
 
-class ChangeMode : public BT::SyncActionNode{
+class ChangeMode : public BT::SyncActionNode
+{
 
 public:
-  ChangeMode(const std::string& name, const BT::NodeConfig & conf);
+  ChangeMode(const std::string & name, const BT::NodeConfig & conf);
 
   BT::NodeStatus tick() override;
 

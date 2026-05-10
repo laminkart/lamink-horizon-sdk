@@ -50,7 +50,7 @@ private:
 
   float battery_level_;
   rclcpp::Subscription<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr diagnostics_sub_;
-  void diagnostics_cb(const diagnostic_msgs::msg::DiagnosticArray &msg);
+  void diagnostics_cb(const diagnostic_msgs::msg::DiagnosticArray & msg);
 };
 
 } //namespace suave_bt

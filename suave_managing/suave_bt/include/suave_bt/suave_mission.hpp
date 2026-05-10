@@ -27,14 +27,15 @@
 namespace suave_bt
 {
 
-class SuaveMission : public rclcpp::Node{
+class SuaveMission : public rclcpp::Node
+{
 
 public:
   SuaveMission(std::string none_name);
 
   bool time_limit_reached();
   void set_search_started();
-  bool is_mission_aborted(){return mission_aborted_;};
+  bool is_mission_aborted() {return mission_aborted_;}
   void finish_mission();
 
 private:

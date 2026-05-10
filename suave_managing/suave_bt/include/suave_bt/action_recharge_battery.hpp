@@ -28,16 +28,17 @@ using namespace std::placeholders;
 namespace suave_bt
 {
 
-class RechargeBattery :  public BT::StatefulActionNode{
+class RechargeBattery : public BT::StatefulActionNode
+{
 
 public:
-  RechargeBattery(const std::string& name, const BT::NodeConfig & conf);
+  RechargeBattery(const std::string & name, const BT::NodeConfig & conf);
 
   BT::NodeStatus onStart() override;
 
   BT::NodeStatus onRunning() override;
 
-  void onHalted() override {};
+  void onHalted() override {}
 
   static BT::PortsList providedPorts()
   {
@@ -51,7 +52,7 @@ private:
 
   bool recharged_;
   rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr battery_level_sub_;
-  void battery_level_cb(const std_msgs::msg::Bool &msg);
+  void battery_level_cb(const std_msgs::msg::Bool & msg);
 };
 
 }  // namespace suave_bt

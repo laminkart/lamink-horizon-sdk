@@ -33,12 +33,13 @@ def generate_launch_description():
         default_value='false',
         description='Suppress all output (launch logs + node logs)'
     )
+
     def configure_logging(context, *args, **kwargs):
         if silent.perform(context) == 'true':
             import logging
             logging.getLogger().setLevel(logging.CRITICAL)
         return []
-    
+
     mission_type = LaunchConfiguration('mission_type')
     result_filename = LaunchConfiguration('result_filename')
     mission_config = LaunchConfiguration('mission_config')

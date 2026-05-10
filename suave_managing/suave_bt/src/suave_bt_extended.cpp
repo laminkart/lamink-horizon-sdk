@@ -43,7 +43,8 @@ int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
 
-  std::shared_ptr<suave_bt::SuaveMission> node = std::make_shared<suave_bt::SuaveMission>("mission_node");
+  std::shared_ptr<suave_bt::SuaveMission> node = std::make_shared<suave_bt::SuaveMission>(
+    "mission_node");
 
   BT::BehaviorTreeFactory factory;
   BT::SharedLibrary loader;
@@ -63,7 +64,10 @@ int main(int argc, char * argv[])
   factory.registerNodeType<suave_bt::IsPipelineFound>("is_pipeline_found");
   factory.registerNodeType<suave_bt::IsPipelineInspected>("is_pipeline_inspected");
 
-  factory.registerSimpleCondition("is_mission_aborted", [&](const auto&) { return node->is_mission_aborted() ? BT::NodeStatus::SUCCESS : BT::NodeStatus::FAILURE; });
+  factory.registerSimpleCondition(
+    "is_mission_aborted", [&](const auto &) {
+      return node->is_mission_aborted() ? BT::NodeStatus::SUCCESS : BT::NodeStatus::FAILURE;
+    });
 
   std::string pkgpath = ament_index_cpp::get_package_share_directory("suave_bt");
   std::string xml_file = pkgpath + "/bts/suave_extended.xml";
@@ -89,8 +93,8 @@ int main(int argc, char * argv[])
   rclcpp::executors::MultiThreadedExecutor executor;
   executor.add_node(node->get_node_base_interface());
   std::thread t([&executor]() {
-    executor.spin();
-  });
+      executor.spin();
+    });
 
   bool finish = false;
   while (!finish & rclcpp::ok()) {
@@ -98,7 +102,7 @@ int main(int argc, char * argv[])
     std::this_thread::sleep_for(100ms);
   }
 
-  if(!node->is_mission_aborted()) node->finish_mission();
+  if (!node->is_mission_aborted()) {node->finish_mission();}
   std::this_thread::sleep_for(1s);
 
   executor.cancel();

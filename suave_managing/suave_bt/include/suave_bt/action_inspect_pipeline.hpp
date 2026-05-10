@@ -28,16 +28,17 @@ using namespace std::placeholders;
 namespace suave_bt
 {
 
-class InspectPipeline : public BT::StatefulActionNode{
+class InspectPipeline : public BT::StatefulActionNode
+{
 
 public:
-  InspectPipeline(const std::string& name, const BT::NodeConfig & conf);
+  InspectPipeline(const std::string & name, const BT::NodeConfig & conf);
 
-  BT::NodeStatus onStart() override {return BT::NodeStatus::RUNNING;};
+  BT::NodeStatus onStart() override {return BT::NodeStatus::RUNNING;}
 
   BT::NodeStatus onRunning() override;
 
-  void onHalted() override {};
+  void onHalted() override {}
 
   static BT::PortsList providedPorts()
   {
@@ -50,7 +51,7 @@ private:
   std::shared_ptr<suave_bt::SuaveMission> node_;
   bool pipeline_inspected_;
   rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr pipeline_inspected_sub_;
-  void pipeline_inspected_cb(const std_msgs::msg::Bool &msg);
+  void pipeline_inspected_cb(const std_msgs::msg::Bool & msg);
 };
 
 }  // namespace suave_bt

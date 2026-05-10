@@ -24,6 +24,7 @@ from rcl_interfaces.msg import Parameter
 from rcl_interfaces.msg import ParameterType
 from rcl_interfaces.srv import SetParameters
 
+
 def read_thruster_events(events):
     thruster_events = []
     if events != '':
@@ -32,6 +33,7 @@ def read_thruster_events(events):
                 thruster_events.append(
                     [e.strip() for e in event.strip('()').split(',')])
     return thruster_events
+
 
 class ThrusterMonitor(Node):
     def __init__(self):
@@ -50,7 +52,7 @@ class ThrusterMonitor(Node):
             State, 'mavros/state', self.status_cb, 10)
 
         self.last_event_time = self.get_clock().now().to_msg().sec
-    
+
     def status_cb(self, msg):
         if msg.mode == 'GUIDED':
             self.last_event_time = self.get_clock().now().to_msg().sec
@@ -110,7 +112,6 @@ class ThrusterMonitor(Node):
         key_value_2 = KeyValue()
         key_value_2.key = 'c_thruster_{}'.format(thruster)
         key_value_2.value = diagnostic_value_2
-
 
         status_msg.name = 'thruster_monitor: Thruster status'
         status_msg.message = 'Component status'

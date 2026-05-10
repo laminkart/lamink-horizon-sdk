@@ -26,14 +26,14 @@ IsPipelineInspected::IsPipelineInspected(
 {
   _node = config().blackboard->get<std::shared_ptr<suave_bt::SuaveMission>>("node");
 
-  pipeline_inspected_sub_  = _node->create_subscription<std_msgs::msg::Bool>(
+  pipeline_inspected_sub_ = _node->create_subscription<std_msgs::msg::Bool>(
     "/pipeline/inspected",
     10,
     std::bind(&IsPipelineInspected::pipeline_inspected_cb, this, _1));
 }
 
 void
-IsPipelineInspected::pipeline_inspected_cb(const std_msgs::msg::Bool &msg)
+IsPipelineInspected::pipeline_inspected_cb(const std_msgs::msg::Bool & msg)
 {
   _pipeline_inspected = msg.data;
 }
@@ -41,7 +41,7 @@ IsPipelineInspected::pipeline_inspected_cb(const std_msgs::msg::Bool &msg)
 BT::NodeStatus
 IsPipelineInspected::tick()
 {
-  return (_pipeline_inspected==true) ? BT::NodeStatus::SUCCESS : BT::NodeStatus::FAILURE;
+  return (_pipeline_inspected == true) ? BT::NodeStatus::SUCCESS : BT::NodeStatus::FAILURE;
 }
 
 }  // namespace suave_bt
