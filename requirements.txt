@@ -1,0 +1,8 @@
+setuptools==75.8.2
+packaging==24.1
+empy==3.3.4
+mavproxy==1.8.74
+PyYAML==6.0.3
+pandas==2.0.2
+scipy==1.15.2
+numpy==1.26.4
