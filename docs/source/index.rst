@@ -11,7 +11,10 @@ Welcome to SUAVE's documentation!
  installation
  docker
  run
+ architecture
  extend
+ implementations
+ metrics
  troubleshooting
  related
  citing

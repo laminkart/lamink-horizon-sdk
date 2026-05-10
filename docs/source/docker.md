@@ -39,6 +39,21 @@ Build the headless image locally from your current checkout:
 docker build -t suave-headless:dev -f docker/dockerfile-suave-headless .
 ```
 
+### Non-interactive (pass command directly)
+
+Run an experiment campaign and save results to your host machine:
+
+```Bash
+docker run -it --shm-size=512m \
+  -v $HOME/suave_results:/home/ubuntu-user/suave/results \
+  ghcr.io/kas-lab/suave-headless:main \
+  ./runner/headless_runner.sh false metacontrol time 2
+```
+
+The runner arguments are: `[true|false] [metacontrol|random|none|bt] [time|distance] <runs>`.
+
+### Interactive (open a shell, then run inside)
+
 Run the local image without GPU:
 ```Bash
 docker run -it --rm --name suave_runner -e DISPLAY=$DISPLAY -e QT_X11_NO_MITSHM=1 -v /tmp/.X11-unix:/tmp/.X11-unix -v /etc/localtime:/etc/localtime:ro suave-headless:dev
@@ -49,7 +64,12 @@ Run the local image with NVIDIA GPU support. Install the [NVIDIA Container Toolk
 docker run -it --rm --gpus all --runtime=nvidia --name suave_runner -e DISPLAY=$DISPLAY -e QT_X11_NO_MITSHM=1 -e NVIDIA_VISIBLE_DEVICES=all -e NVIDIA_DRIVER_CAPABILITIES=all -v /dev/dri:/dev/dri -v /tmp/.X11-unix:/tmp/.X11-unix -v /etc/localtime:/etc/localtime:ro suave-headless:dev
 ```
 
-You can try by running:
+If you want the image to have access to the host GUI, run the following command before starting the container:
+```Bash
+xhost +
+```
+
+Once inside the container, start an experiment with the ROS 2 runner:
 
 ```Bash
 ros2 run suave_runner suave_runner \
@@ -61,11 +81,6 @@ ros2 run suave_runner suave_runner \
       \"adaptation_manager\": \"bt\", \
       \"mission_name\": \"suave\"}"
   ]'
-```
-
-If you want the image to have access to the host GUI, run the following command before running the image:
-```Bash
-xhost +
 ```
 
 ## Build Docker images locally

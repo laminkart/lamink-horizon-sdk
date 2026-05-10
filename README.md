@@ -14,7 +14,7 @@ This repository is organized as following:
 - The package [suave](https://github.com/kas-lab/suave/tree/main/suave) contains the managed subsystem functionalities
 - The package [suave_monitor](https://github.com/kas-lab/suave/tree/main/suave_monitor) contains the monitor nodes
 - The package [suave_missions](https://github.com/kas-lab/suave/tree/main/suave_missions) contains the AUV's missions
-- The package [suave_metrics](https://github.com/kas-lab/suave/tree/main/suave_metrics) contains the a node used for collecting mission metrics
+- The package [suave_metrics](https://github.com/kas-lab/suave/tree/main/suave_metrics) contains a node used for collecting mission metrics
 - The package [suave_metacontrol](https://github.com/kas-lab/suave/tree/main/suave_managing/suave_metacontrol) contains the metacontrol implementation of the managing subsystem
 - The package [suave_random](https://github.com/kas-lab/suave/tree/main/suave_managing/suave_random) contains the implementation of a random managing subsystems
 - The package [suave_bt](https://github.com/kas-lab/suave/tree/main/suave_managing/suave_bt) contains the behavior tree implementation of the managing subsystem
@@ -26,7 +26,7 @@ A video of the SUAVE running (click in the image to open the video):
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=X8yUZjM5bfk"/>
-  <img src="https://user-images.githubusercontent.com/20564040/227582421-6f96300d-9042-4743-8f30-9e6aecda8340.png" width="500">
+  <img src="docs/images/image.png" width="500">
 </p>
 
 
@@ -42,6 +42,7 @@ A paper describing this exemplar was presented at SEAMS 2023 artifact track, you
 
 ## Navigate the README
 - [Use SUAVE with Docker](#use-suave-with-docker)
+  - [Use the headless image](#use-the-headless-image)
 - [Install SUAVE locally](#install-suave-locally)
 - [Run SUAVE](#run-suave)
 - [Extending SUAVE and connecting managing subsystems](#extending-suave-and-connecting-managing-subsystems)
@@ -75,6 +76,43 @@ A dialog will request a username and password, these are shown below, with the p
  - **Password**: `password`
 
 Now you can proceed to [run the exemplar](#run-suave).
+
+### Use the headless image
+
+The headless image (`ghcr.io/kas-lab/suave-headless:main`) is designed for automated experiment campaigns on servers or CI machines where no display is available. It uses a virtual framebuffer (Xvfb) so Gazebo can still run off-screen.
+
+Pull and run an experiment campaign:
+
+```Bash
+docker run -it --shm-size=512m \
+  ghcr.io/kas-lab/suave-headless:main \
+  ./runner/headless_runner.sh false metacontrol time 2
+```
+
+The runner arguments are the same as `runner.sh`:
+1. `true` or `false` — whether to show a GUI (use `false` for headless)
+2. `metacontrol`, `random`, or `none` — adaptation manager
+3. `time` or `distance` — mission type
+4. Number of runs (integer)
+
+To save results to your host machine, mount a volume to `/home/ubuntu-user/suave/results`:
+
+```Bash
+docker run -it --shm-size=512m \
+  -v $HOME/suave_results:/home/ubuntu-user/suave/results \
+  ghcr.io/kas-lab/suave-headless:main \
+  ./runner/headless_runner.sh false metacontrol time 2
+```
+
+**NVIDIA GPU support:** If your machine has an NVIDIA GPU, install the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) and use:
+
+```Bash
+docker run -it --rm --gpus all --runtime=nvidia --shm-size=512m \
+  -e NVIDIA_VISIBLE_DEVICES=all -e NVIDIA_DRIVER_CAPABILITIES=all \
+  -v $HOME/suave_results:/home/ubuntu-user/suave/results \
+  ghcr.io/kas-lab/suave-headless:main \
+  ./runner/headless_runner.sh false metacontrol time 2
+```
 
 ### Build Docker images locally
 To build the docker images locally, run:
@@ -248,29 +286,42 @@ To follow the robot as it progresses along its mission make sure to right click 
 
 #### Full Runner
 
-To run the exemplar with the runner, first make sure you are in the suave workspace:
+There are two ways to run a full experiment campaign.
+
+**Option 1 — Shell runner** (simple, positional arguments):
 
 ```Bash
 cd ~/suave_ws/src/suave/runner/
-```
-
-Then run:
-
-Without gui:
-```Bash
 ./runner.sh false metacontrol time 2
 ```
 
-With gui:
+The script takes 4 positional arguments:
+1. `true` or `false` — whether to show a GUI
+2. `metacontrol`, `random`, `none`, or `bt` — adaptation manager
+3. `time` or `distance` — mission type
+4. Number of runs (integer)
+
+**Option 2 — ROS 2 runner** (config-file driven, recommended for larger campaigns):
+
 ```Bash
-./runner.sh true metacontrol time 2
+cd ~/suave_ws/
+source install/setup.bash
+ros2 run suave_runner suave_runner \
+  --ros-args \
+  -p gui:=False \
+  -p experiments:='[
+    "{\"experiment_launch\": \"ros2 launch suave_bt suave_bt.launch.py\", \
+      \"num_runs\": 2, \
+      \"adaptation_manager\": \"bt\", \
+      \"mission_name\": \"suave\"}"
+  ]'
 ```
 
-The runner script takes 4 positional parameters:
-1. true or false -> indicates if the gui should be used
-2. metacontrol or random or none -> indicates which managing subsystem to use
-3. time or distance -> indicates which mission to run
-4. number of runs
+Or using a launch file with a [config file](https://github.com/kas-lab/suave/blob/main/suave_runner/config/runner_config.yml):
+
+```Bash
+ros2 launch suave_runner suave_runner.launch.py
+```
 
 ### Without the runner
 
@@ -312,13 +363,13 @@ ros2 launch suave_missions mission.launch.py
 
 **Mission results:** The mission results will be saved in the path specified in the [mission_config.yaml](https://github.com/kas-lab/suave/blob/main/suave_missions/config/mission_config.yaml) file.
 
-**Selecting the manging system and mission type:**
+**Selecting the managing system and mission type:**
 Launching the mission file without launch arguments will start a time-constrained mission without a managing subsystem. To select a different managing subsystem or a different type of mission, the following launch arguments can be used:
 
 ```
 'adaptation_manager':
     Managing subsystem to be used
-    available values: none/metacontrol/random
+    available values: none/metacontrol/random/bt
     (default: 'none')
 
 'mission_type':

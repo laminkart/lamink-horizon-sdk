@@ -16,11 +16,28 @@ To follow the robot as it progresses along its mission make sure to right click 
 
 ### Full Runner
 
-To run the exemplar with the runner, first make sure you source the suave workspace:
+There are two ways to run a full experiment campaign.
+
+**Option 1 — Shell runner** (simple, positional arguments):
+
+```Bash
+cd ~/suave_ws/src/suave/runner/
+./runner.sh false metacontrol time 2
+```
+
+The script takes 4 positional arguments:
+1. `true` or `false` — whether to show a GUI
+2. `metacontrol`, `random`, `none`, or `bt` — adaptation manager
+3. `time` or `distance` — mission type
+4. Number of runs (integer)
+
+**Option 2 — ROS 2 runner** (config-file driven, recommended for larger campaigns):
+
+First make sure you source the suave workspace:
 
 ```Bash
 cd ~/suave_ws/
-source ~/suave_ws/install/setup.bash
+source install/setup.bash
 ```
 
 Then run:
@@ -57,7 +74,50 @@ You can also use a launch file with a [config file](https://github.com/kas-lab/s
 ros2 launch suave_runner suave_runner.launch.py
 ```
 
-To run SUAVE with different managing subsystems. Just replace the `experiment_launch` with the proper launch file.
+To run SUAVE with different managing subsystems, replace the `experiment_launch` with the proper launch file.
+
+### Runner config reference
+
+`suave_runner/config/runner_config.yml` controls all experiment parameters. The key fields are:
+
+| Parameter | Default | Description |
+|---|---|---|
+| `result_path` | `~/suave/results` | Directory where CSV result files are written |
+| `gui` | `false` | Launch Gazebo with a visible window |
+| `experiment_logging` | `false` | Enable verbose logging during experiments |
+| `mission_config_pkg` | `suave_missions` | ROS package containing the mission config |
+| `mission_config_file` | `config/runner_mission_config.yaml` | Path to mission config within that package |
+| `initial_pos_x` / `y` | `-17.0` / `2.5` | AUV spawn position in the Gazebo world |
+| `initial_pos_x_random_interval` | `[0.0, 0.0]` | Random offset range applied to X spawn position each run |
+| `initial_pos_y_random_interval` | `[-0.5, 0.5]` | Random offset range applied to Y spawn position each run |
+| `water_visibility_sec_shift` | `0.0` | Fixed time offset (s) before the water visibility disturbance |
+| `water_visibility_sec_shift_random_interval` | `[0.0, 120.0]` | Random range added on top of the fixed offset |
+| `thruster_events` | `[(1,failure,100), (3,failure,100)]` | List of thruster events: `(id, type, time_s)` |
+| `thruster_events_random_interval` | `[-100.0, 100.0]` | Random offset (s) applied to each thruster event time |
+| `random_interval` | `5` | Number of runs before re-randomising offsets |
+| `experiments` | *(see file)* | List of experiment definitions (see below) |
+
+Each entry in `experiments` is a JSON string with four fields:
+
+```yaml
+experiments:
+  - |
+    {
+      "experiment_launch": "ros2 launch suave_bt suave_bt.launch.py",
+      "num_runs": 10,
+      "adaptation_manager": "bt",
+      "mission_name": "suave"
+    }
+```
+
+| Field | Description |
+|---|---|
+| `experiment_launch` | Full `ros2 launch` command for the managing subsystem |
+| `num_runs` | Number of times to repeat this experiment |
+| `adaptation_manager` | Label written into result CSV files |
+| `mission_name` | Mission label written into result CSV files |
+
+Multiple experiments can be listed and will be run sequentially. See the [Metrics Reference](metrics.md) for details on output files.
 
 ## Without the runner
 
@@ -99,7 +159,7 @@ ros2 launch suave_missions mission.launch.py
 
 **Mission results:** The mission results will be saved in the path specified in the [mission_config.yaml](https://github.com/kas-lab/suave/blob/main/suave_missions/config/mission_config.yaml) file.
 
-**Selecting the manging system and mission type:**
+**Selecting the managing system and mission type:**
 Launching the mission file without launch arguments will start a time-constrained mission without a managing subsystem. To select a different managing subsystem or a different type of mission, the following launch arguments can be used:
 
 ```
